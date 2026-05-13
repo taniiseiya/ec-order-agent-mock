@@ -1435,23 +1435,12 @@
       pointer-events: none;
     }
 
-    .art-avatar .avatar-mouth {
-      position: absolute;
-      left: 50%;
-      top: 39.4%;
-      bottom: auto;
-      width: 30px;
-      height: 5px;
-      border: 0;
-      border-radius: 0 0 18px 18px;
-      background: #9b4d45;
-      transform: translateX(-50%);
-      opacity: 0.88;
-      transition: height 0.12s ease, border-radius 0.12s ease, transform 0.12s ease;
+    .art-avatar.is-speaking img {
+      animation: receptionistTalk 1.05s ease-in-out infinite;
     }
 
-    .art-avatar.is-speaking .avatar-mouth {
-      animation: artMouthTalk 0.34s ease-in-out infinite;
+    .art-avatar.is-thinking img {
+      filter: saturate(0.94) contrast(0.98) brightness(0.99);
     }
 
     .art-avatar .thought-dots {
@@ -1710,16 +1699,12 @@
       }
     }
 
-    @keyframes artMouthTalk {
+    @keyframes receptionistTalk {
       0%, 100% {
-        height: 5px;
-        border-radius: 0 0 18px 18px;
-        transform: translateX(-50%) translateY(0) scaleX(1);
+        transform: translateY(0) scale(1);
       }
-      45% {
-        height: 17px;
-        border-radius: 50%;
-        transform: translateX(-50%) translateY(5px) scaleX(0.72);
+      50% {
+        transform: translateY(3px) scale(1.006);
       }
     }
 
@@ -1754,7 +1739,7 @@
 
     @media (prefers-reduced-motion: reduce) {
       .reception-avatar.is-speaking,
-      .reception-avatar.is-speaking .avatar-mouth,
+      .art-avatar.is-speaking img,
       .reception-avatar.is-thinking .thought-dots span,
       .voice-meter.is-active .meter-bars span {
         animation: none;
@@ -2213,7 +2198,6 @@
               <div class="avatar-scene art-scene">
                 <div class="reception-avatar art-avatar is-idle" id="receptionAvatar" aria-hidden="true">
                   <img src="assets/receptionist/staff-idle.png" alt="">
-                  <span class="avatar-mouth"></span>
                   <div class="thought-dots"><span></span><span></span><span></span></div>
                 </div>
               </div>
