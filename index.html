@@ -1405,6 +1405,64 @@
       animation-delay: 0.24s;
     }
 
+    .avatar-scene.art-scene {
+      min-height: 456px;
+      background: #fbfcff;
+      padding: var(--space-4);
+    }
+
+    .avatar-scene.art-scene::before {
+      display: none;
+    }
+
+    .art-avatar {
+      width: min(100%, 640px);
+      height: auto;
+      aspect-ratio: 3 / 2;
+      align-self: center;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    .art-avatar img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+      filter: saturate(0.96) contrast(0.98);
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .art-avatar .avatar-mouth {
+      position: absolute;
+      left: 50%;
+      top: 39.4%;
+      bottom: auto;
+      width: 30px;
+      height: 5px;
+      border: 0;
+      border-radius: 0 0 18px 18px;
+      background: #9b4d45;
+      transform: translateX(-50%);
+      opacity: 0.88;
+      transition: height 0.12s ease, border-radius 0.12s ease, transform 0.12s ease;
+    }
+
+    .art-avatar.is-speaking .avatar-mouth {
+      animation: artMouthTalk 0.34s ease-in-out infinite;
+    }
+
+    .art-avatar .thought-dots {
+      right: 23%;
+      top: 22%;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 10px;
+      background: rgba(255, 255, 255, 0.88);
+    }
+
     .voice-meter {
       min-height: 52px;
       border: 1px solid var(--line-soft);
@@ -1652,6 +1710,19 @@
       }
     }
 
+    @keyframes artMouthTalk {
+      0%, 100% {
+        height: 5px;
+        border-radius: 0 0 18px 18px;
+        transform: translateX(-50%) translateY(0) scaleX(1);
+      }
+      45% {
+        height: 17px;
+        border-radius: 50%;
+        transform: translateX(-50%) translateY(5px) scaleX(0.72);
+      }
+    }
+
     @keyframes avatarNod {
       0%, 100% {
         transform: translateY(0);
@@ -1885,12 +1956,17 @@
         padding: var(--space-4);
       }
 
-      .avatar-scene {
+      .avatar-scene:not(.art-scene) {
         min-height: 340px;
       }
 
-      .reception-avatar {
+      .reception-avatar:not(.art-avatar) {
         transform: scale(0.86);
+      }
+
+      .avatar-scene.art-scene {
+        min-height: 320px;
+        padding: var(--space-2);
       }
 
       .reception-form,
@@ -2134,26 +2210,10 @@
                 <span class="state-pill"><span class="state-light" aria-hidden="true"></span><span id="receptionStateText">待機中</span></span>
               </div>
 
-              <div class="avatar-scene">
-                <div class="avatar-desk" aria-hidden="true"></div>
-                <div class="desk-label" aria-hidden="true">AI受付</div>
-                <div class="reception-avatar is-idle" id="receptionAvatar" aria-hidden="true">
-                  <div class="avatar-shadow"></div>
-                  <div class="avatar-hair"></div>
-                  <div class="avatar-neck"></div>
-                  <div class="avatar-torso"><div class="avatar-jacket"></div></div>
-                  <div class="avatar-head">
-                    <span class="avatar-brow left"></span>
-                    <span class="avatar-brow right"></span>
-                    <span class="avatar-eye left"></span>
-                    <span class="avatar-eye right"></span>
-                    <span class="avatar-nose"></span>
-                    <span class="avatar-blush left"></span>
-                    <span class="avatar-blush right"></span>
-                    <span class="avatar-mouth"></span>
-                  </div>
-                  <span class="avatar-hand left"></span>
-                  <span class="avatar-hand right"></span>
+              <div class="avatar-scene art-scene">
+                <div class="reception-avatar art-avatar is-idle" id="receptionAvatar" aria-hidden="true">
+                  <img src="assets/receptionist/staff-idle.png" alt="">
+                  <span class="avatar-mouth"></span>
                   <div class="thought-dots"><span></span><span></span><span></span></div>
                 </div>
               </div>
@@ -2449,7 +2509,7 @@
       const meter = document.getElementById("voiceMeter");
       if (!avatar || !stateText || !voiceLine || !meter) return;
 
-      avatar.className = `reception-avatar is-${state}`;
+      avatar.className = `reception-avatar art-avatar is-${state}`;
       meter.classList.toggle("is-active", state === "speaking");
       const label = state === "speaking" ? "応答中" : state === "thinking" ? "確認中" : "待機中";
       stateText.textContent = label;
