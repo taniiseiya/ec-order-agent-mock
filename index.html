@@ -366,6 +366,7 @@
     }
 
     .dashboard.mode-dashboard .dashboard-view,
+    .dashboard.mode-reception .reception-view,
     .dashboard.mode-queue .queue-view,
     .dashboard.mode-malls .malls-view,
     .dashboard.mode-exceptions .exceptions-view,
@@ -374,11 +375,16 @@
     }
 
     .dashboard-view,
+    .reception-view,
     .queue-view,
     .malls-view,
     .exceptions-view,
     .rules-view {
       gap: var(--space-4);
+    }
+
+    .dashboard.mode-reception .filterbar {
+      display: none;
     }
 
     .kpi-grid {
@@ -1073,6 +1079,617 @@
       accent-color: var(--blue-900);
     }
 
+    .reception-shell {
+      display: grid;
+      grid-template-columns: minmax(320px, 0.92fr) minmax(0, 1.08fr);
+      gap: var(--space-4);
+      align-items: stretch;
+    }
+
+    .reception-stage {
+      min-height: 620px;
+      padding: var(--space-5);
+      display: grid;
+      grid-template-rows: auto minmax(360px, 1fr) auto;
+      gap: var(--space-4);
+    }
+
+    .reception-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+      min-height: 42px;
+      color: var(--label);
+      font-size: 13px;
+    }
+
+    .reception-status strong {
+      display: block;
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+
+    .state-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0 var(--space-3);
+      color: var(--gray-800);
+      white-space: nowrap;
+    }
+
+    .state-light {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    .avatar-scene {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: 390px;
+      border: 1px solid var(--line-soft);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(#fbfcff 0 66%, #eef3fb 66% 100%),
+        #fff;
+      overflow: hidden;
+    }
+
+    .avatar-scene::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 74px;
+      height: 1px;
+      background: var(--line-soft);
+    }
+
+    .avatar-desk {
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      bottom: 42px;
+      height: 58px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+
+    .desk-label {
+      position: absolute;
+      left: 50%;
+      bottom: 58px;
+      transform: translateX(-50%);
+      min-width: 132px;
+      min-height: 32px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--blue-900);
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .reception-avatar {
+      position: relative;
+      width: 214px;
+      height: 318px;
+      align-self: end;
+      z-index: 1;
+      transform-origin: 50% 100%;
+      transition: transform 0.2s ease;
+    }
+
+    .avatar-shadow {
+      position: absolute;
+      left: 28px;
+      right: 28px;
+      bottom: 26px;
+      height: 16px;
+      border-radius: 50%;
+      background: rgba(47, 51, 56, 0.1);
+    }
+
+    .avatar-torso {
+      position: absolute;
+      left: 39px;
+      bottom: 24px;
+      width: 136px;
+      height: 122px;
+      border-radius: 44px 44px 10px 10px;
+      background: var(--blue-900);
+      border: 1px solid #123d85;
+    }
+
+    .avatar-jacket {
+      position: absolute;
+      inset: 24px 18px 0;
+      border-radius: 28px 28px 8px 8px;
+      background:
+        linear-gradient(115deg, transparent 0 47%, #fff 48% 54%, transparent 55% 100%),
+        #244f9c;
+    }
+
+    .avatar-neck {
+      position: absolute;
+      left: 88px;
+      bottom: 134px;
+      width: 38px;
+      height: 34px;
+      border-radius: 12px;
+      background: #e9b59f;
+      border: 1px solid #d6a08c;
+    }
+
+    .avatar-head {
+      position: absolute;
+      left: 55px;
+      bottom: 152px;
+      width: 104px;
+      height: 118px;
+      border-radius: 44% 44% 46% 46%;
+      background: #f2c6b5;
+      border: 1px solid #dfac99;
+      z-index: 2;
+    }
+
+    .avatar-hair {
+      position: absolute;
+      left: 46px;
+      bottom: 198px;
+      width: 124px;
+      height: 100px;
+      border-radius: 46px 46px 34px 34px;
+      background: #2f3338;
+      z-index: 1;
+    }
+
+    .avatar-hair::after {
+      content: "";
+      position: absolute;
+      left: 40px;
+      top: 18px;
+      width: 70px;
+      height: 58px;
+      border-radius: 36px 24px 42px 12px;
+      background: #3d4249;
+      transform: rotate(-16deg);
+    }
+
+    .avatar-eye {
+      position: absolute;
+      top: 53px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gray-800);
+    }
+
+    .avatar-eye.left {
+      left: 30px;
+    }
+
+    .avatar-eye.right {
+      right: 30px;
+    }
+
+    .avatar-brow {
+      position: absolute;
+      top: 42px;
+      width: 18px;
+      height: 2px;
+      border-radius: 99px;
+      background: rgba(47, 51, 56, 0.48);
+    }
+
+    .avatar-brow.left {
+      left: 25px;
+    }
+
+    .avatar-brow.right {
+      right: 25px;
+    }
+
+    .avatar-nose {
+      position: absolute;
+      top: 62px;
+      left: 49px;
+      width: 8px;
+      height: 18px;
+      border-right: 1px solid #d59d8a;
+      border-bottom: 1px solid #d59d8a;
+      border-radius: 0 0 8px 0;
+    }
+
+    .avatar-mouth {
+      position: absolute;
+      left: 39px;
+      bottom: 24px;
+      width: 26px;
+      height: 7px;
+      border: 2px solid #9f4c4c;
+      border-top: 0;
+      border-radius: 0 0 18px 18px;
+      background: #f7ddd5;
+      transform-origin: 50% 0;
+      transition: height 0.14s ease, transform 0.14s ease;
+    }
+
+    .avatar-blush {
+      position: absolute;
+      top: 72px;
+      width: 14px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(214, 112, 112, 0.28);
+    }
+
+    .avatar-blush.left {
+      left: 18px;
+    }
+
+    .avatar-blush.right {
+      right: 18px;
+    }
+
+    .avatar-hand {
+      position: absolute;
+      bottom: 80px;
+      width: 38px;
+      height: 18px;
+      border-radius: 999px;
+      background: #f2c6b5;
+      border: 1px solid #dfac99;
+      z-index: 3;
+    }
+
+    .avatar-hand.left {
+      left: 18px;
+      transform: rotate(-18deg);
+    }
+
+    .avatar-hand.right {
+      right: 18px;
+      transform: rotate(18deg);
+    }
+
+    .thought-dots {
+      position: absolute;
+      right: 38px;
+      top: 46px;
+      display: flex;
+      gap: 5px;
+      opacity: 0;
+    }
+
+    .thought-dots span {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--blue-400);
+    }
+
+    .reception-avatar.is-speaking {
+      animation: avatarNod 1.4s ease-in-out infinite;
+    }
+
+    .reception-avatar.is-speaking .avatar-mouth {
+      animation: mouthTalk 0.38s ease-in-out infinite;
+    }
+
+    .reception-avatar.is-thinking .thought-dots {
+      opacity: 1;
+    }
+
+    .reception-avatar.is-thinking .thought-dots span {
+      animation: thoughtPulse 0.9s ease-in-out infinite;
+    }
+
+    .reception-avatar.is-thinking .thought-dots span:nth-child(2) {
+      animation-delay: 0.12s;
+    }
+
+    .reception-avatar.is-thinking .thought-dots span:nth-child(3) {
+      animation-delay: 0.24s;
+    }
+
+    .voice-meter {
+      min-height: 52px;
+      border: 1px solid var(--line-soft);
+      border-radius: var(--radius);
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      gap: var(--space-4);
+      padding: var(--space-3) var(--space-4);
+      background: #fff;
+    }
+
+    .meter-bars {
+      height: 28px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .meter-bars span {
+      width: 5px;
+      height: 8px;
+      border-radius: 99px;
+      background: var(--blue-400);
+      opacity: 0.38;
+    }
+
+    .voice-meter.is-active .meter-bars span {
+      opacity: 1;
+      animation: meterMove 0.64s ease-in-out infinite;
+    }
+
+    .voice-meter.is-active .meter-bars span:nth-child(2) {
+      animation-delay: 0.08s;
+    }
+
+    .voice-meter.is-active .meter-bars span:nth-child(3) {
+      animation-delay: 0.16s;
+    }
+
+    .voice-meter.is-active .meter-bars span:nth-child(4) {
+      animation-delay: 0.24s;
+    }
+
+    .voice-meter.is-active .meter-bars span:nth-child(5) {
+      animation-delay: 0.32s;
+    }
+
+    .voice-copy {
+      min-width: 0;
+      color: var(--label);
+      font-size: 12px;
+    }
+
+    .voice-copy strong {
+      display: block;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .reception-workspace {
+      display: grid;
+      grid-template-rows: auto minmax(260px, 1fr) auto;
+      gap: var(--space-4);
+    }
+
+    .reception-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-3);
+    }
+
+    .summary-tile {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: var(--space-4);
+      display: grid;
+      gap: var(--space-2);
+      min-height: 104px;
+    }
+
+    .summary-tile span {
+      color: var(--label);
+      font-size: 12px;
+    }
+
+    .summary-tile strong {
+      color: var(--text);
+      font-size: 22px;
+      line-height: 1.1;
+      font-weight: 650;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .chat-panel {
+      min-height: 430px;
+    }
+
+    .reception-log {
+      display: grid;
+      gap: var(--space-3);
+      max-height: 420px;
+      overflow: auto;
+      padding-right: var(--space-1);
+    }
+
+    .message {
+      display: grid;
+      gap: 5px;
+      max-width: 82%;
+    }
+
+    .message.staff {
+      justify-self: start;
+    }
+
+    .message.user {
+      justify-self: end;
+    }
+
+    .message-name {
+      color: var(--label);
+      font-size: 12px;
+    }
+
+    .message-bubble {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: var(--space-3) var(--space-4);
+      background: #fff;
+      color: var(--gray-800);
+      line-height: 1.65;
+    }
+
+    .message.user .message-bubble {
+      background: var(--blue-50);
+      color: var(--text);
+      border-color: var(--blue-200);
+    }
+
+    .intent-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--space-3);
+    }
+
+    .intent-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      min-height: 74px;
+      padding: var(--space-3);
+      text-align: left;
+      color: var(--text);
+      display: grid;
+      gap: 3px;
+      align-content: center;
+    }
+
+    .intent-card strong {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .intent-card span {
+      color: var(--label);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .intent-card:hover {
+      border-color: var(--blue-200);
+      background: var(--blue-50);
+    }
+
+    .reception-form {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: var(--space-2);
+    }
+
+    .reception-input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      min-height: 44px;
+      color: var(--text);
+      padding: 0 var(--space-4);
+      outline: 0;
+    }
+
+    .voice-toggle {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--blue-900);
+      min-height: 44px;
+      padding: 0 var(--space-3);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .voice-toggle[aria-pressed="false"] {
+      color: var(--label);
+      background: var(--control);
+    }
+
+    .bridge-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-3);
+    }
+
+    .bridge-item {
+      border: 1px solid var(--line-soft);
+      border-radius: var(--radius);
+      padding: var(--space-3);
+      background: #fff;
+      display: grid;
+      gap: 4px;
+    }
+
+    .bridge-item span {
+      color: var(--label);
+      font-size: 12px;
+    }
+
+    .bridge-item strong {
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    @keyframes mouthTalk {
+      0%, 100% {
+        height: 5px;
+        transform: translateY(0) scaleX(1);
+      }
+      45% {
+        height: 18px;
+        transform: translateY(4px) scaleX(0.82);
+      }
+    }
+
+    @keyframes avatarNod {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(2px);
+      }
+    }
+
+    @keyframes thoughtPulse {
+      0%, 100% {
+        transform: translateY(0);
+        opacity: 0.38;
+      }
+      50% {
+        transform: translateY(-5px);
+        opacity: 1;
+      }
+    }
+
+    @keyframes meterMove {
+      0%, 100% {
+        height: 8px;
+      }
+      50% {
+        height: 26px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reception-avatar.is-speaking,
+      .reception-avatar.is-speaking .avatar-mouth,
+      .reception-avatar.is-thinking .thought-dots span,
+      .voice-meter.is-active .meter-bars span {
+        animation: none;
+      }
+    }
+
     .toast {
       position: fixed;
       right: var(--space-5);
@@ -1126,6 +1743,10 @@
       }
 
       .trend-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .reception-shell {
         grid-template-columns: 1fr;
       }
     }
@@ -1183,8 +1804,14 @@
 
       .kpi-grid,
       .exception-grid,
-      .rules-grid {
+      .rules-grid,
+      .reception-summary,
+      .bridge-grid {
         grid-template-columns: 1fr;
+      }
+
+      .intent-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
@@ -1252,6 +1879,28 @@
       .segment {
         overflow-x: auto;
       }
+
+      .reception-stage {
+        min-height: 540px;
+        padding: var(--space-4);
+      }
+
+      .avatar-scene {
+        min-height: 340px;
+      }
+
+      .reception-avatar {
+        transform: scale(0.86);
+      }
+
+      .reception-form,
+      .intent-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .message {
+        max-width: 100%;
+      }
     }
   </style>
 </head>
@@ -1275,6 +1924,10 @@
         <button type="button" data-view="dashboard" aria-selected="true">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 13h7V4H4v9Zm0 7h7v-5H4v5Zm9 0h7v-9h-7v9Zm0-16v5h7V4h-7Z"/></svg>
           <span>ダッシュボード</span>
+        </button>
+        <button type="button" data-view="reception" aria-selected="false">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3a4 4 0 0 1 4 4c0 1.4-.7 2.6-1.7 3.3A7 7 0 0 1 20 17v2H4v-2a7 7 0 0 1 5.7-6.7A4 4 0 0 1 8 7a4 4 0 0 1 4-4Zm-5 13v1h10v-1a5 5 0 0 0-10 0Zm5-7a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/></svg>
+          <span>AI受付</span>
         </button>
         <button type="button" data-view="queue" aria-selected="false">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 3h12a2 2 0 0 1 2 2v16l-3-2-3 2-3-2-3 2-4-2V5a2 2 0 0 1 2-2Zm2 5h8V6H8v2Zm0 5h8v-2H8v2Zm0 4h5v-2H8v2Z"/></svg>
@@ -1320,8 +1973,8 @@
       <main class="content dashboard mode-dashboard" id="dashboard">
         <div class="page-head">
           <div>
-            <h1 class="page-title">EC受注処理ダッシュボード</h1>
-            <p class="page-lead">Amazon、楽天市場、Yahoo!ショッピング、Shopifyの受注状況を、出荷判断に必要な粒度で集約しています。</p>
+            <h1 class="page-title" id="pageTitle">EC受注処理ダッシュボード</h1>
+            <p class="page-lead" id="pageLead">Amazon、楽天市場、Yahoo!ショッピング、Shopifyの受注状況を、出荷判断に必要な粒度で集約しています。</p>
           </div>
           <div class="filterbar" aria-label="表示条件">
             <select aria-label="対象日"><option>本日</option><option>昨日</option><option>今週</option></select>
@@ -1466,6 +2119,103 @@
                 <div class="check-row"><div><div class="row-title">決済照合</div><div class="row-sub">未照合 3件</div></div><span class="badge warn">確認</span></div>
                 <div class="check-row"><div><div class="row-title">倉庫連携</div><div class="row-sub">東日本倉庫に遅延なし</div></div><span class="badge success">正常</span></div>
               </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view reception-view" aria-label="AI受付">
+          <div class="reception-shell">
+            <section class="panel reception-stage" aria-label="受付スタッフ">
+              <div class="reception-status">
+                <div>
+                  <strong>受付スタッフ</strong>
+                  <span id="receptionGreeting">本日の受注・要対応・出荷締めを案内します。</span>
+                </div>
+                <span class="state-pill"><span class="state-light" aria-hidden="true"></span><span id="receptionStateText">待機中</span></span>
+              </div>
+
+              <div class="avatar-scene">
+                <div class="avatar-desk" aria-hidden="true"></div>
+                <div class="desk-label" aria-hidden="true">AI受付</div>
+                <div class="reception-avatar is-idle" id="receptionAvatar" aria-hidden="true">
+                  <div class="avatar-shadow"></div>
+                  <div class="avatar-hair"></div>
+                  <div class="avatar-neck"></div>
+                  <div class="avatar-torso"><div class="avatar-jacket"></div></div>
+                  <div class="avatar-head">
+                    <span class="avatar-brow left"></span>
+                    <span class="avatar-brow right"></span>
+                    <span class="avatar-eye left"></span>
+                    <span class="avatar-eye right"></span>
+                    <span class="avatar-nose"></span>
+                    <span class="avatar-blush left"></span>
+                    <span class="avatar-blush right"></span>
+                    <span class="avatar-mouth"></span>
+                  </div>
+                  <span class="avatar-hand left"></span>
+                  <span class="avatar-hand right"></span>
+                  <div class="thought-dots"><span></span><span></span><span></span></div>
+                </div>
+              </div>
+
+              <div class="voice-meter" id="voiceMeter" aria-label="発話状態">
+                <div class="meter-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+                <div class="voice-copy">
+                  <strong id="voiceLine">ご用件を入力してください。</strong>
+                  <span>音声エンジン: ブラウザ</span>
+                </div>
+              </div>
+            </section>
+
+            <section class="reception-workspace" aria-label="受付会話">
+              <div class="reception-summary" aria-label="受付で確認できる状況">
+                <div class="summary-tile"><span>出荷締め</span><strong>16:00</strong><span>残り20分</span></div>
+                <div class="summary-tile"><span>要対応</span><strong>38件</strong><span>住所・在庫・高額確認</span></div>
+                <div class="summary-tile"><span>接続</span><strong>無料モック</strong><span>外部APIなし</span></div>
+              </div>
+
+              <section class="panel chat-panel">
+                <div class="panel-head">
+                  <div>
+                    <h2 class="panel-title">受付会話</h2>
+                    <p class="panel-note">応答元: デモロジック / CLIブリッジ: 未接続</p>
+                  </div>
+                  <button class="voice-toggle" type="button" id="voiceToggle" aria-pressed="true">音声 ON</button>
+                </div>
+                <div class="panel-body reception-log" id="receptionLog" aria-live="polite">
+                  <div class="message staff">
+                    <span class="message-name">受付AI</span>
+                    <div class="message-bubble">いらっしゃいませ。本日のEC受注状況について、要対応、出荷締め、モール別状況を確認できます。</div>
+                  </div>
+                </div>
+              </section>
+
+              <div class="intent-grid" aria-label="よく使う受付メニュー">
+                <button class="intent-card" type="button" data-intent="status"><strong>本日の状況</strong><span>受注・自動処理・出荷OK</span></button>
+                <button class="intent-card" type="button" data-intent="exceptions"><strong>要対応</strong><span>締め前の確認事項</span></button>
+                <button class="intent-card" type="button" data-intent="shipping"><strong>出荷締め</strong><span>残件と優先順</span></button>
+                <button class="intent-card" type="button" data-intent="handoff"><strong>担当者へ引継ぎ</strong><span>確認メモを作成</span></button>
+              </div>
+
+              <form class="reception-form" id="receptionForm">
+                <input class="reception-input" id="receptionInput" type="text" autocomplete="off" placeholder="例: 今日の要対応を教えてください">
+                <button class="voice-toggle" type="button" id="greetingButton">あいさつ</button>
+                <button class="action-primary" type="submit">送信</button>
+              </form>
+
+              <section class="panel">
+                <div class="panel-head">
+                  <div>
+                    <h2 class="panel-title">接続状態</h2>
+                    <p class="panel-note">公開画面: 静的 / ローカル: CLI接続想定</p>
+                  </div>
+                </div>
+                <div class="panel-body bridge-grid">
+                  <div class="bridge-item"><span>ブラウザ</span><strong>GitHub Pages表示</strong></div>
+                  <div class="bridge-item"><span>脳</span><strong>ChatGPT/Codex CLI</strong></div>
+                  <div class="bridge-item"><span>接続</span><strong>localhostのみ</strong></div>
+                </div>
+              </section>
             </section>
           </div>
         </section>
@@ -1625,6 +2375,59 @@
       done: "完了"
     };
 
+    const viewCopy = {
+      dashboard: {
+        title: "EC受注処理ダッシュボード",
+        lead: "Amazon、楽天市場、Yahoo!ショッピング、Shopifyの受注状況を、出荷判断に必要な粒度で集約しています。"
+      },
+      reception: {
+        title: "AI受付スタッフ",
+        lead: "受付担当者が応対する体験として、受注状況の確認、要対応の案内、担当者への引継ぎを行います。"
+      },
+      queue: {
+        title: "受注キュー",
+        lead: "注文番号、購入者、SKU、判定内容から、処理対象の受注をすばやく確認します。"
+      },
+      malls: {
+        title: "モール連携状況",
+        lead: "モール別の取得状況、要対応件数、次に確認すべき作業を整理します。"
+      },
+      exceptions: {
+        title: "要対応レビュー",
+        lead: "締め前に担当者判断が必要な受注を優先度順に確認します。"
+      },
+      rules: {
+        title: "自動処理ルール",
+        lead: "自動処理の対象範囲と、人の確認を必須にする条件を整理します。"
+      }
+    };
+
+    const receptionReplies = {
+      status: {
+        user: "本日の状況を教えてください",
+        reply: "本日の受注は3,256件です。自動処理済みは2,348件、出荷OKは1,126件、要対応は38件です。出荷締め前は住所確認と高額注文の確認を優先してください。"
+      },
+      exceptions: {
+        user: "要対応を確認したいです",
+        reply: "要対応は38件です。内訳は住所確認14件、在庫引当待ち12件、高額注文の確認8件、同梱確認4件です。優先度が高いものからレビュー画面に案内します。"
+      },
+      shipping: {
+        user: "出荷締めまでに何をすべきですか",
+        reply: "出荷締めは16時です。残り20分なので、住所確認14件と高額注文8件を先に確認してください。在庫引当待ちは楽天市場の予約商品を中心に確認します。"
+      },
+      handoff: {
+        user: "担当者へ引き継いでください",
+        reply: "引継ぎメモを作成しました。確認対象は住所確認14件、高額注文8件、決済未照合3件です。担当者には締め前レビューを優先するよう案内します。"
+      },
+      greeting: {
+        user: "受付を開始してください",
+        reply: "いらっしゃいませ。EC受注ハブの受付です。本日の受注状況、要対応、出荷締め、モール別状況についてお答えします。"
+      }
+    };
+
+    let receptionistVoiceOn = true;
+    let receptionistStateTimer;
+
     const yen = (value) => new Intl.NumberFormat("ja-JP", {
       style: "currency",
       currency: "JPY",
@@ -1637,6 +2440,74 @@
       el.classList.add("visible");
       clearTimeout(toast.timer);
       toast.timer = setTimeout(() => el.classList.remove("visible"), 2300);
+    }
+
+    function setReceptionState(state, line) {
+      const avatar = document.getElementById("receptionAvatar");
+      const stateText = document.getElementById("receptionStateText");
+      const voiceLine = document.getElementById("voiceLine");
+      const meter = document.getElementById("voiceMeter");
+      if (!avatar || !stateText || !voiceLine || !meter) return;
+
+      avatar.className = `reception-avatar is-${state}`;
+      meter.classList.toggle("is-active", state === "speaking");
+      const label = state === "speaking" ? "応答中" : state === "thinking" ? "確認中" : "待機中";
+      stateText.textContent = label;
+      if (line) voiceLine.textContent = line;
+    }
+
+    function addReceptionMessage(role, text) {
+      const log = document.getElementById("receptionLog");
+      if (!log) return;
+      const message = document.createElement("div");
+      message.className = `message ${role}`;
+      const name = document.createElement("span");
+      name.className = "message-name";
+      name.textContent = role === "staff" ? "受付AI" : "利用者";
+      const bubble = document.createElement("div");
+      bubble.className = "message-bubble";
+      bubble.textContent = text;
+      message.append(name, bubble);
+      log.appendChild(message);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function composeReceptionReply(input) {
+      const text = input.replace(/\s+/g, "");
+      if (text.includes("要対応") || text.includes("確認") || text.includes("レビュー")) return receptionReplies.exceptions.reply;
+      if (text.includes("締め") || text.includes("出荷") || text.includes("残り")) return receptionReplies.shipping.reply;
+      if (text.includes("引継") || text.includes("引き継") || text.includes("担当")) return receptionReplies.handoff.reply;
+      if (text.includes("状況") || text.includes("今日") || text.includes("本日") || text.includes("何件")) return receptionReplies.status.reply;
+      return "承知しました。現在は無料モックのため、受注状況、要対応、出荷締め、担当者への引継ぎについて案内できます。必要な内容をもう少し具体的に入力してください。";
+    }
+
+    function speakReception(text) {
+      clearTimeout(receptionistStateTimer);
+      setReceptionState("speaking", text);
+
+      if (!receptionistVoiceOn || !("speechSynthesis" in window)) {
+        receptionistStateTimer = setTimeout(() => setReceptionState("idle", "ご用件を入力してください。"), Math.min(3600, text.length * 60));
+        return;
+      }
+
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "ja-JP";
+      utterance.rate = 0.95;
+      utterance.pitch = 1.04;
+      utterance.onend = () => setReceptionState("idle", "ご用件を入力してください。");
+      utterance.onerror = () => setReceptionState("idle", "ご用件を入力してください。");
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function runReceptionReply(userText, replyText) {
+      if (userText) addReceptionMessage("user", userText);
+      setReceptionState("thinking", "確認しています。");
+      clearTimeout(receptionistStateTimer);
+      receptionistStateTimer = setTimeout(() => {
+        addReceptionMessage("staff", replyText);
+        speakReception(replyText);
+      }, 520);
     }
 
     function drawBars() {
@@ -1714,11 +2585,15 @@
 
     function setView(view) {
       const dashboard = document.getElementById("dashboard");
-      dashboard.classList.remove("mode-dashboard", "mode-queue", "mode-malls", "mode-exceptions", "mode-rules");
+      dashboard.classList.remove("mode-dashboard", "mode-reception", "mode-queue", "mode-malls", "mode-exceptions", "mode-rules");
       dashboard.classList.add(`mode-${view}`);
       document.querySelectorAll(".nav button").forEach((button) => {
         button.setAttribute("aria-selected", String(button.dataset.view === view));
       });
+      if (viewCopy[view]) {
+        document.getElementById("pageTitle").textContent = viewCopy[view].title;
+        document.getElementById("pageLead").textContent = viewCopy[view].lead;
+      }
     }
 
     function setStatus(id, status) {
@@ -1790,6 +2665,35 @@
 
     document.getElementById("stockRange").addEventListener("input", (event) => {
       document.getElementById("stockText").textContent = `${event.target.value}%`;
+    });
+
+    document.querySelectorAll("[data-intent]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const item = receptionReplies[button.dataset.intent];
+        if (!item) return;
+        runReceptionReply(item.user, item.reply);
+      });
+    });
+
+    document.getElementById("receptionForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const input = document.getElementById("receptionInput");
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = "";
+      runReceptionReply(text, composeReceptionReply(text));
+    });
+
+    document.getElementById("greetingButton").addEventListener("click", () => {
+      runReceptionReply(receptionReplies.greeting.user, receptionReplies.greeting.reply);
+    });
+
+    document.getElementById("voiceToggle").addEventListener("click", (event) => {
+      receptionistVoiceOn = !receptionistVoiceOn;
+      event.currentTarget.setAttribute("aria-pressed", String(receptionistVoiceOn));
+      event.currentTarget.textContent = receptionistVoiceOn ? "音声 ON" : "音声 OFF";
+      if (!receptionistVoiceOn && "speechSynthesis" in window) window.speechSynthesis.cancel();
+      setReceptionState("idle", receptionistVoiceOn ? "音声応答を有効にしました。" : "音声応答を停止しました。");
     });
 
     drawBars();
