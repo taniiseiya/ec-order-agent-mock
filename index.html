@@ -1414,12 +1414,22 @@
     }
 
     .receptionist-frame {
+      display: grid;
+      place-items: center;
       width: 100%;
       height: 100%;
-      background-image: url("assets/receptionist/staff-idle.png");
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: contain;
+      overflow: hidden;
+      background: #fbfcff;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .receptionist-frame img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+      filter: saturate(0.97) contrast(0.99);
       pointer-events: none;
       user-select: none;
     }
@@ -2152,7 +2162,9 @@
 
               <div class="avatar-scene art-scene">
                 <div class="reception-avatar art-avatar is-idle" id="receptionAvatar" aria-hidden="true">
-                  <div id="receptionistFrame" class="receptionist-frame"></div>
+                  <div id="receptionistFrame" class="receptionist-frame">
+                    <img id="receptionistStaffFrame" src="assets/receptionist/staff-idle.png" alt="" decoding="async">
+                  </div>
                   <div class="thought-dots"><span></span><span></span><span></span></div>
                 </div>
               </div>
@@ -2428,12 +2440,11 @@
       idle: "assets/receptionist/staff-idle.png",
       thinking: "assets/receptionist/staff-thinking.png",
       smile: "assets/receptionist/staff-smile.png",
-      speakingSprite: "assets/receptionist/staff-speak-sprite.png",
-      speakingFrameCount: 12,
-      speakingColumns: 4
+      speaking: Array.from({ length: 12 }, (_, index) => `assets/receptionist/staff-talk-${String(index).padStart(2, "0")}.png`)
     };
 
-    const speechFrameMs = 64;
+    const speechFrameMs = 58;
+    const speechFrameOrder = [0, 1, 2, 3, 2, 1, 0, 1, 4, 5, 6, 7, 8, 9, 10, 11];
 
     let receptionistVoiceOn = true;
     let receptionistStateTimer;
@@ -2456,11 +2467,9 @@
     }
 
     function setReceptionistImage(src) {
-      const frame = document.getElementById("receptionistFrame");
-      if (!frame) return;
-      frame.style.backgroundImage = `url("${src}")`;
-      frame.style.backgroundSize = "contain";
-      frame.style.backgroundPosition = "center";
+      const image = document.getElementById("receptionistStaffFrame");
+      if (!image || image.getAttribute("src") === src) return;
+      image.src = src;
     }
 
     function stopReceptionistFrames() {
@@ -2474,31 +2483,22 @@
 
     function startReceptionistSpeaking() {
       stopReceptionistFrames();
-      const frame = document.getElementById("receptionistFrame");
-      if (!frame) return;
-      frame.style.backgroundImage = `url("${receptionistFrames.speakingSprite}")`;
-      frame.style.backgroundSize = `${receptionistFrames.speakingColumns * 100}% ${Math.ceil(receptionistFrames.speakingFrameCount / receptionistFrames.speakingColumns) * 100}%`;
-      setReceptionistSpriteFrame(0);
+      setReceptionistSpeechFrame(0);
       receptionistFrameStart = performance.now();
       const tick = (now) => {
-        const nextIndex = Math.floor((now - receptionistFrameStart) / speechFrameMs) % receptionistFrames.speakingFrameCount;
+        const nextIndex = Math.floor((now - receptionistFrameStart) / speechFrameMs) % speechFrameOrder.length;
         if (nextIndex !== receptionistFrameIndex) {
           receptionistFrameIndex = nextIndex;
-          setReceptionistSpriteFrame(receptionistFrameIndex);
+          setReceptionistSpeechFrame(receptionistFrameIndex);
         }
         receptionistFrameTimer = requestAnimationFrame(tick);
       };
       receptionistFrameTimer = requestAnimationFrame(tick);
     }
 
-    function setReceptionistSpriteFrame(index) {
-      const frame = document.getElementById("receptionistFrame");
-      if (!frame) return;
-      const columns = receptionistFrames.speakingColumns;
-      const rows = Math.ceil(receptionistFrames.speakingFrameCount / columns);
-      const column = index % columns;
-      const row = Math.floor(index / columns);
-      frame.style.backgroundPosition = `${column * 100 / (columns - 1)}% ${row * 100 / (rows - 1)}%`;
+    function setReceptionistSpeechFrame(sequenceIndex) {
+      const frameIndex = speechFrameOrder[sequenceIndex] ?? 0;
+      setReceptionistImage(receptionistFrames.speaking[frameIndex] || receptionistFrames.idle);
     }
 
     function finishReceptionResponse() {
@@ -2771,9 +2771,10 @@
       receptionistFrames.idle,
       receptionistFrames.thinking,
       receptionistFrames.smile,
-      receptionistFrames.speakingSprite
+      ...receptionistFrames.speaking
     ].forEach((src) => {
       const image = new Image();
+      image.decoding = "async";
       image.src = src;
     });
 
