@@ -1417,7 +1417,18 @@
       pointer-events: none;
     }
 
-    .art-avatar.is-thinking img {
+    .receptionist-frame {
+      width: 100%;
+      height: 100%;
+      background-image: url("assets/receptionist/staff-idle.png");
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: contain;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .art-avatar.is-thinking .receptionist-frame {
       filter: saturate(0.94) contrast(0.98) brightness(0.99);
     }
 
@@ -2154,7 +2165,7 @@
 
               <div class="avatar-scene art-scene">
                 <div class="reception-avatar art-avatar is-idle" id="receptionAvatar" aria-hidden="true">
-                  <img id="receptionistImage" src="assets/receptionist/staff-idle.png" alt="">
+                  <div id="receptionistFrame" class="receptionist-frame"></div>
                   <div class="thought-dots"><span></span><span></span><span></span></div>
                 </div>
               </div>
@@ -2430,24 +2441,9 @@
       idle: "assets/receptionist/staff-idle.png",
       thinking: "assets/receptionist/staff-thinking.png",
       smile: "assets/receptionist/staff-smile.png",
-      speaking: [
-        "assets/receptionist/staff-speak-00.png",
-        "assets/receptionist/staff-speak-01.png",
-        "assets/receptionist/staff-speak-02.png",
-        "assets/receptionist/staff-speak-03.png",
-        "assets/receptionist/staff-speak-04.png",
-        "assets/receptionist/staff-speak-05.png",
-        "assets/receptionist/staff-speak-06.png",
-        "assets/receptionist/staff-speak-07.png",
-        "assets/receptionist/staff-speak-08.png",
-        "assets/receptionist/staff-speak-09.png",
-        "assets/receptionist/staff-speak-10.png",
-        "assets/receptionist/staff-speak-11.png",
-        "assets/receptionist/staff-speak-12.png",
-        "assets/receptionist/staff-speak-13.png",
-        "assets/receptionist/staff-speak-14.png",
-        "assets/receptionist/staff-speak-15.png"
-      ]
+      speakingSprite: "assets/receptionist/staff-speak-sprite.png",
+      speakingFrameCount: 16,
+      speakingColumns: 4
     };
 
     let receptionistVoiceOn = true;
@@ -2470,8 +2466,11 @@
     }
 
     function setReceptionistImage(src) {
-      const image = document.getElementById("receptionistImage");
-      if (image && image.getAttribute("src") !== src) image.setAttribute("src", src);
+      const frame = document.getElementById("receptionistFrame");
+      if (!frame) return;
+      frame.style.backgroundImage = `url("${src}")`;
+      frame.style.backgroundSize = "contain";
+      frame.style.backgroundPosition = "center";
     }
 
     function stopReceptionistFrames() {
@@ -2482,12 +2481,25 @@
 
     function startReceptionistSpeaking() {
       stopReceptionistFrames();
-      const frames = receptionistFrames.speaking;
-      setReceptionistImage(frames[0]);
+      const frame = document.getElementById("receptionistFrame");
+      if (!frame) return;
+      frame.style.backgroundImage = `url("${receptionistFrames.speakingSprite}")`;
+      frame.style.backgroundSize = `${receptionistFrames.speakingColumns * 100}% ${Math.ceil(receptionistFrames.speakingFrameCount / receptionistFrames.speakingColumns) * 100}%`;
+      setReceptionistSpriteFrame(0);
       receptionistFrameTimer = setInterval(() => {
-        receptionistFrameIndex = (receptionistFrameIndex + 1) % frames.length;
-        setReceptionistImage(frames[receptionistFrameIndex]);
+        receptionistFrameIndex = (receptionistFrameIndex + 1) % receptionistFrames.speakingFrameCount;
+        setReceptionistSpriteFrame(receptionistFrameIndex);
       }, 72);
+    }
+
+    function setReceptionistSpriteFrame(index) {
+      const frame = document.getElementById("receptionistFrame");
+      if (!frame) return;
+      const columns = receptionistFrames.speakingColumns;
+      const rows = Math.ceil(receptionistFrames.speakingFrameCount / columns);
+      const column = index % columns;
+      const row = Math.floor(index / columns);
+      frame.style.backgroundPosition = `${column * 100 / (columns - 1)}% ${row * 100 / (rows - 1)}%`;
     }
 
     function finishReceptionResponse() {
@@ -2760,7 +2772,7 @@
       receptionistFrames.idle,
       receptionistFrames.thinking,
       receptionistFrames.smile,
-      ...receptionistFrames.speaking
+      receptionistFrames.speakingSprite
     ].forEach((src) => {
       const image = new Image();
       image.src = src;
