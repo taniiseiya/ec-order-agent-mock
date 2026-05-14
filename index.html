@@ -1367,10 +1367,6 @@
       background: var(--blue-400);
     }
 
-    .reception-avatar.is-speaking {
-      animation: avatarNod 1.4s ease-in-out infinite;
-    }
-
     .reception-avatar.is-thinking .thought-dots {
       opacity: 1;
     }
@@ -1675,15 +1671,6 @@
       color: var(--text);
       font-size: 13px;
       font-weight: 600;
-    }
-
-    @keyframes avatarNod {
-      0%, 100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(2px);
-      }
     }
 
     @keyframes thoughtPulse {
@@ -2442,14 +2429,17 @@
       thinking: "assets/receptionist/staff-thinking.png",
       smile: "assets/receptionist/staff-smile.png",
       speakingSprite: "assets/receptionist/staff-speak-sprite.png",
-      speakingFrameCount: 16,
+      speakingFrameCount: 12,
       speakingColumns: 4
     };
+
+    const speechFrameMs = 64;
 
     let receptionistVoiceOn = true;
     let receptionistStateTimer;
     let receptionistFrameTimer;
     let receptionistFrameIndex = 0;
+    let receptionistFrameStart = 0;
 
     const yen = (value) => new Intl.NumberFormat("ja-JP", {
       style: "currency",
@@ -2474,9 +2464,12 @@
     }
 
     function stopReceptionistFrames() {
-      clearInterval(receptionistFrameTimer);
+      if (receptionistFrameTimer) {
+        cancelAnimationFrame(receptionistFrameTimer);
+      }
       receptionistFrameTimer = undefined;
       receptionistFrameIndex = 0;
+      receptionistFrameStart = 0;
     }
 
     function startReceptionistSpeaking() {
@@ -2486,10 +2479,16 @@
       frame.style.backgroundImage = `url("${receptionistFrames.speakingSprite}")`;
       frame.style.backgroundSize = `${receptionistFrames.speakingColumns * 100}% ${Math.ceil(receptionistFrames.speakingFrameCount / receptionistFrames.speakingColumns) * 100}%`;
       setReceptionistSpriteFrame(0);
-      receptionistFrameTimer = setInterval(() => {
-        receptionistFrameIndex = (receptionistFrameIndex + 1) % receptionistFrames.speakingFrameCount;
-        setReceptionistSpriteFrame(receptionistFrameIndex);
-      }, 72);
+      receptionistFrameStart = performance.now();
+      const tick = (now) => {
+        const nextIndex = Math.floor((now - receptionistFrameStart) / speechFrameMs) % receptionistFrames.speakingFrameCount;
+        if (nextIndex !== receptionistFrameIndex) {
+          receptionistFrameIndex = nextIndex;
+          setReceptionistSpriteFrame(receptionistFrameIndex);
+        }
+        receptionistFrameTimer = requestAnimationFrame(tick);
+      };
+      receptionistFrameTimer = requestAnimationFrame(tick);
     }
 
     function setReceptionistSpriteFrame(index) {
