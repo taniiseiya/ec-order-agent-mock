@@ -1417,10 +1417,6 @@
       pointer-events: none;
     }
 
-    .art-avatar.is-speaking img {
-      animation: receptionistTalk 1.05s ease-in-out infinite;
-    }
-
     .art-avatar.is-thinking img {
       filter: saturate(0.94) contrast(0.98) brightness(0.99);
     }
@@ -1670,15 +1666,6 @@
       font-weight: 600;
     }
 
-    @keyframes receptionistTalk {
-      0%, 100% {
-        transform: translateY(0) scale(1);
-      }
-      50% {
-        transform: translateY(3px) scale(1.006);
-      }
-    }
-
     @keyframes avatarNod {
       0%, 100% {
         transform: translateY(0);
@@ -1710,7 +1697,6 @@
 
     @media (prefers-reduced-motion: reduce) {
       .reception-avatar.is-speaking,
-      .art-avatar.is-speaking img,
       .reception-avatar.is-thinking .thought-dots span,
       .voice-meter.is-active .meter-bars span {
         animation: none;
@@ -2445,10 +2431,22 @@
       thinking: "assets/receptionist/staff-thinking.png",
       smile: "assets/receptionist/staff-smile.png",
       speaking: [
-        "assets/receptionist/staff-mouth-small.png",
-        "assets/receptionist/staff-mouth-open.png",
-        "assets/receptionist/staff-mouth-small.png",
-        "assets/receptionist/staff-idle.png"
+        "assets/receptionist/staff-speak-00.png",
+        "assets/receptionist/staff-speak-01.png",
+        "assets/receptionist/staff-speak-02.png",
+        "assets/receptionist/staff-speak-03.png",
+        "assets/receptionist/staff-speak-04.png",
+        "assets/receptionist/staff-speak-05.png",
+        "assets/receptionist/staff-speak-06.png",
+        "assets/receptionist/staff-speak-07.png",
+        "assets/receptionist/staff-speak-08.png",
+        "assets/receptionist/staff-speak-09.png",
+        "assets/receptionist/staff-speak-10.png",
+        "assets/receptionist/staff-speak-11.png",
+        "assets/receptionist/staff-speak-12.png",
+        "assets/receptionist/staff-speak-13.png",
+        "assets/receptionist/staff-speak-14.png",
+        "assets/receptionist/staff-speak-15.png"
       ]
     };
 
@@ -2489,7 +2487,7 @@
       receptionistFrameTimer = setInterval(() => {
         receptionistFrameIndex = (receptionistFrameIndex + 1) % frames.length;
         setReceptionistImage(frames[receptionistFrameIndex]);
-      }, 170);
+      }, 72);
     }
 
     function finishReceptionResponse() {
