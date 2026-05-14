@@ -1418,7 +1418,6 @@
       place-items: center;
       width: 100%;
       height: 100%;
-      position: relative;
       overflow: hidden;
       background: #fbfcff;
       pointer-events: none;
@@ -1426,21 +1425,13 @@
     }
 
     .receptionist-frame img {
-      position: absolute;
-      inset: 0;
       width: 100%;
       height: 100%;
       display: block;
       object-fit: cover;
-      opacity: 0;
       filter: saturate(0.97) contrast(0.99);
-      transition: opacity 72ms linear;
       pointer-events: none;
       user-select: none;
-    }
-
-    .receptionist-frame img.is-active {
-      opacity: 1;
     }
 
     .art-avatar.is-thinking .receptionist-frame {
@@ -1717,10 +1708,6 @@
       .reception-avatar.is-thinking .thought-dots span,
       .voice-meter.is-active .meter-bars span {
         animation: none;
-      }
-
-      .receptionist-frame img {
-        transition: none;
       }
     }
 
@@ -2176,8 +2163,7 @@
               <div class="avatar-scene art-scene">
                 <div class="reception-avatar art-avatar is-idle" id="receptionAvatar" aria-hidden="true">
                   <div id="receptionistFrame" class="receptionist-frame">
-                    <img id="receptionistStaffFrameA" class="receptionist-frame-image is-active" src="assets/receptionist/staff-idle.png" alt="" decoding="async">
-                    <img id="receptionistStaffFrameB" class="receptionist-frame-image" src="assets/receptionist/staff-idle.png" alt="" decoding="async">
+                    <img id="receptionistStaffImage" src="assets/receptionist/staff-idle.png" alt="" decoding="async">
                   </div>
                   <div class="thought-dots"><span></span><span></span><span></span></div>
                 </div>
@@ -2453,19 +2439,12 @@
     const receptionistFrames = {
       idle: "assets/receptionist/staff-idle.png",
       thinking: "assets/receptionist/staff-thinking.png",
-      smile: "assets/receptionist/staff-smile.png",
-      speaking: Array.from({ length: 12 }, (_, index) => `assets/receptionist/staff-talk-${String(index).padStart(2, "0")}.png`)
+      speaking: "assets/receptionist/staff-speaking.png",
+      smile: "assets/receptionist/staff-smile.png"
     };
-
-    const speechFrameMs = 88;
-    const speechFrameOrder = [0, 1, 2, 3, 4, 5, 3, 2, 6, 7, 8, 9, 5, 3, 2, 10, 1, 0];
 
     let receptionistVoiceOn = true;
     let receptionistStateTimer;
-    let receptionistFrameTimer;
-    let receptionistFrameIndex = 0;
-    let receptionistFrameStart = 0;
-    let receptionistImageToken = 0;
 
     const yen = (value) => new Intl.NumberFormat("ja-JP", {
       style: "currency",
@@ -2481,68 +2460,10 @@
       toast.timer = setTimeout(() => el.classList.remove("visible"), 2300);
     }
 
-    function setReceptionistImage(src, instant = false) {
-      const images = Array.from(document.querySelectorAll(".receptionist-frame-image"));
-      if (!images.length) return;
-      const active = images.find((image) => image.classList.contains("is-active")) || images[0];
-      if (active.getAttribute("src") === src) return;
-
-      const next = images.find((image) => image !== active) || active;
-      receptionistImageToken += 1;
-      const token = receptionistImageToken;
-
-      if (instant) {
-        images.forEach((image, index) => {
-          image.style.transitionDuration = "0ms";
-          image.src = src;
-          image.classList.toggle("is-active", index === 0);
-        });
-        requestAnimationFrame(() => {
-          images.forEach((image) => image.style.transitionDuration = "");
-        });
-        return;
-      }
-
-      next.src = src;
-      const commit = () => {
-        if (token !== receptionistImageToken) return;
-        next.classList.add("is-active");
-        active.classList.remove("is-active");
-      };
-      if (typeof next.decode === "function") {
-        next.decode().then(commit).catch(commit);
-      } else {
-        commit();
-      }
-    }
-
-    function stopReceptionistFrames() {
-      if (receptionistFrameTimer) {
-        cancelAnimationFrame(receptionistFrameTimer);
-      }
-      receptionistFrameTimer = undefined;
-      receptionistFrameIndex = 0;
-      receptionistFrameStart = 0;
-    }
-
-    function startReceptionistSpeaking() {
-      stopReceptionistFrames();
-      setReceptionistSpeechFrame(0);
-      receptionistFrameStart = performance.now();
-      const tick = (now) => {
-        const nextIndex = Math.floor((now - receptionistFrameStart) / speechFrameMs) % speechFrameOrder.length;
-        if (nextIndex !== receptionistFrameIndex) {
-          receptionistFrameIndex = nextIndex;
-          setReceptionistSpeechFrame(receptionistFrameIndex);
-        }
-        receptionistFrameTimer = requestAnimationFrame(tick);
-      };
-      receptionistFrameTimer = requestAnimationFrame(tick);
-    }
-
-    function setReceptionistSpeechFrame(sequenceIndex) {
-      const frameIndex = speechFrameOrder[sequenceIndex] ?? 0;
-      setReceptionistImage(receptionistFrames.speaking[frameIndex] || receptionistFrames.idle);
+    function setReceptionistImage(src) {
+      const image = document.getElementById("receptionistStaffImage");
+      if (!image || image.getAttribute("src") === src) return;
+      image.src = src;
     }
 
     function finishReceptionResponse() {
@@ -2558,14 +2479,9 @@
       const meter = document.getElementById("voiceMeter");
       if (!avatar || !stateText || !voiceLine || !meter) return;
 
-      stopReceptionistFrames();
       avatar.className = `reception-avatar art-avatar is-${state}`;
       meter.classList.toggle("is-active", state === "speaking");
-      if (state === "speaking") {
-        startReceptionistSpeaking();
-      } else {
-        setReceptionistImage(receptionistFrames[state] || receptionistFrames.idle);
-      }
+      setReceptionistImage(receptionistFrames[state] || receptionistFrames.idle);
       const label = state === "speaking" ? "応答中" : state === "thinking" ? "確認中" : state === "smile" ? "案内完了" : "待機中";
       stateText.textContent = label;
       if (line) voiceLine.textContent = line;
@@ -2814,8 +2730,8 @@
     [
       receptionistFrames.idle,
       receptionistFrames.thinking,
-      receptionistFrames.smile,
-      ...receptionistFrames.speaking
+      receptionistFrames.speaking,
+      receptionistFrames.smile
     ].forEach((src) => {
       const image = new Image();
       image.decoding = "async";
