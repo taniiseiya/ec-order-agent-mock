@@ -1313,20 +1313,6 @@
       border-radius: 0 0 8px 0;
     }
 
-    .avatar-mouth {
-      position: absolute;
-      left: 39px;
-      bottom: 24px;
-      width: 26px;
-      height: 7px;
-      border: 2px solid #9f4c4c;
-      border-top: 0;
-      border-radius: 0 0 18px 18px;
-      background: #f7ddd5;
-      transform-origin: 50% 0;
-      transition: height 0.14s ease, transform 0.14s ease;
-    }
-
     .avatar-blush {
       position: absolute;
       top: 72px;
@@ -1383,10 +1369,6 @@
 
     .reception-avatar.is-speaking {
       animation: avatarNod 1.4s ease-in-out infinite;
-    }
-
-    .reception-avatar.is-speaking .avatar-mouth {
-      animation: mouthTalk 0.38s ease-in-out infinite;
     }
 
     .reception-avatar.is-thinking .thought-dots {
@@ -1686,17 +1668,6 @@
       color: var(--text);
       font-size: 13px;
       font-weight: 600;
-    }
-
-    @keyframes mouthTalk {
-      0%, 100% {
-        height: 5px;
-        transform: translateY(0) scaleX(1);
-      }
-      45% {
-        height: 18px;
-        transform: translateY(4px) scaleX(0.82);
-      }
     }
 
     @keyframes receptionistTalk {
@@ -2197,7 +2168,7 @@
 
               <div class="avatar-scene art-scene">
                 <div class="reception-avatar art-avatar is-idle" id="receptionAvatar" aria-hidden="true">
-                  <img src="assets/receptionist/staff-idle.png" alt="">
+                  <img id="receptionistImage" src="assets/receptionist/staff-idle.png" alt="">
                   <div class="thought-dots"><span></span><span></span><span></span></div>
                 </div>
               </div>
@@ -2469,8 +2440,22 @@
       }
     };
 
+    const receptionistFrames = {
+      idle: "assets/receptionist/staff-idle.png",
+      thinking: "assets/receptionist/staff-thinking.png",
+      smile: "assets/receptionist/staff-smile.png",
+      speaking: [
+        "assets/receptionist/staff-mouth-small.png",
+        "assets/receptionist/staff-mouth-open.png",
+        "assets/receptionist/staff-mouth-small.png",
+        "assets/receptionist/staff-idle.png"
+      ]
+    };
+
     let receptionistVoiceOn = true;
     let receptionistStateTimer;
+    let receptionistFrameTimer;
+    let receptionistFrameIndex = 0;
 
     const yen = (value) => new Intl.NumberFormat("ja-JP", {
       style: "currency",
@@ -2486,6 +2471,33 @@
       toast.timer = setTimeout(() => el.classList.remove("visible"), 2300);
     }
 
+    function setReceptionistImage(src) {
+      const image = document.getElementById("receptionistImage");
+      if (image && image.getAttribute("src") !== src) image.setAttribute("src", src);
+    }
+
+    function stopReceptionistFrames() {
+      clearInterval(receptionistFrameTimer);
+      receptionistFrameTimer = undefined;
+      receptionistFrameIndex = 0;
+    }
+
+    function startReceptionistSpeaking() {
+      stopReceptionistFrames();
+      const frames = receptionistFrames.speaking;
+      setReceptionistImage(frames[0]);
+      receptionistFrameTimer = setInterval(() => {
+        receptionistFrameIndex = (receptionistFrameIndex + 1) % frames.length;
+        setReceptionistImage(frames[receptionistFrameIndex]);
+      }, 170);
+    }
+
+    function finishReceptionResponse() {
+      setReceptionState("smile", "ご用件を入力してください。");
+      clearTimeout(receptionistStateTimer);
+      receptionistStateTimer = setTimeout(() => setReceptionState("idle", "ご用件を入力してください。"), 900);
+    }
+
     function setReceptionState(state, line) {
       const avatar = document.getElementById("receptionAvatar");
       const stateText = document.getElementById("receptionStateText");
@@ -2493,9 +2505,15 @@
       const meter = document.getElementById("voiceMeter");
       if (!avatar || !stateText || !voiceLine || !meter) return;
 
+      stopReceptionistFrames();
       avatar.className = `reception-avatar art-avatar is-${state}`;
       meter.classList.toggle("is-active", state === "speaking");
-      const label = state === "speaking" ? "応答中" : state === "thinking" ? "確認中" : "待機中";
+      if (state === "speaking") {
+        startReceptionistSpeaking();
+      } else {
+        setReceptionistImage(receptionistFrames[state] || receptionistFrames.idle);
+      }
+      const label = state === "speaking" ? "応答中" : state === "thinking" ? "確認中" : state === "smile" ? "案内完了" : "待機中";
       stateText.textContent = label;
       if (line) voiceLine.textContent = line;
     }
@@ -2530,7 +2548,7 @@
       setReceptionState("speaking", text);
 
       if (!receptionistVoiceOn || !("speechSynthesis" in window)) {
-        receptionistStateTimer = setTimeout(() => setReceptionState("idle", "ご用件を入力してください。"), Math.min(3600, text.length * 60));
+        receptionistStateTimer = setTimeout(finishReceptionResponse, Math.min(3600, text.length * 60));
         return;
       }
 
@@ -2539,7 +2557,7 @@
       utterance.lang = "ja-JP";
       utterance.rate = 0.95;
       utterance.pitch = 1.04;
-      utterance.onend = () => setReceptionState("idle", "ご用件を入力してください。");
+      utterance.onend = finishReceptionResponse;
       utterance.onerror = () => setReceptionState("idle", "ご用件を入力してください。");
       window.speechSynthesis.speak(utterance);
     }
@@ -2738,6 +2756,16 @@
       event.currentTarget.textContent = receptionistVoiceOn ? "音声 ON" : "音声 OFF";
       if (!receptionistVoiceOn && "speechSynthesis" in window) window.speechSynthesis.cancel();
       setReceptionState("idle", receptionistVoiceOn ? "音声応答を有効にしました。" : "音声応答を停止しました。");
+    });
+
+    [
+      receptionistFrames.idle,
+      receptionistFrames.thinking,
+      receptionistFrames.smile,
+      ...receptionistFrames.speaking
+    ].forEach((src) => {
+      const image = new Image();
+      image.src = src;
     });
 
     drawBars();
